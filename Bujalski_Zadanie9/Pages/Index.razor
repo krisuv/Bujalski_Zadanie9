@@ -1,0 +1,156 @@
+﻿@page "/"
+
+<PageTitle>Zadanie 9</PageTitle>
+
+@code{
+    public class Unit
+    {
+        public string Name { set; get; }
+        public float ToBaseUnit { set; get; }
+        public Unit(string name, float toBaseUnit)
+        {
+            Name = name;
+            ToBaseUnit = toBaseUnit;
+        }
+    }
+
+    List<Unit> weightUnits = new List<Unit>(){
+        new Unit("g", 1),
+        new Unit("dg", 100),
+        new Unit("kg", 1000),
+        new Unit("t", 1000000)
+    };
+
+    List<Unit> currencyUnits = new List<Unit>(){
+        new Unit("PLN", 1),
+        new Unit("EUR", (float)4.71),
+        new Unit("GBP", (float)5.36),
+        new Unit("USD", (float)4.33)
+    };
+
+    public enum EUnits {
+        Waluta,
+        Waga
+    }
+
+    public enum EValues {
+        To,
+        From
+    }
+
+    private EUnits activeSelection = EUnits.Waluta;
+
+
+    private string valueFrom = "PLN";
+    private string valueTo = "PLN";
+    private float ammountFrom = 0;
+    private float ammountTo = 0;
+
+    public void handleUnitChange(ChangeEventArgs e){
+        ammountFrom = 0;
+        ammountTo = 0;
+        string selectedUnit = e.Value.ToString();
+        if(selectedUnit == "weight"){
+            valueFrom = "g";
+            valueTo = "g";
+            activeSelection = EUnits.Waga;
+        } else if(selectedUnit == "currency"){
+            valueFrom = "PLN";
+            valueTo = "PLN";
+            activeSelection = EUnits.Waluta;
+        } else {
+            Console.WriteLine("Nie wybrano jednostki");
+        }
+
+    }
+
+    public void handleSubUnitChange(ChangeEventArgs e,  EValues type){
+        ammountFrom = 0;
+        ammountTo = 0;
+        string selectedUnit = e.Value.ToString();
+        Console.WriteLine(selectedUnit);
+        if (selectedUnit == null) return;
+        if(type == EValues.From){
+            valueFrom = selectedUnit;
+        } else {
+            valueTo = selectedUnit;
+        }
+    }
+
+    public void handleValueChange(ChangeEventArgs e){
+        if (e.Value.ToString() == "" 
+        || e.Value.ToString() == "." 
+        || e.Value.ToString() == "+" 
+        || e.Value.ToString() == "-") return;
+        Console.WriteLine(e.Value.ToString());
+        //float ammount = (float)Convert.ToDouble(e.Value.ToString());
+        float ammount = float.Parse(e.Value.ToString(), System.Globalization.CultureInfo.InvariantCulture);
+        float formattedAmount = (float)Math.Round(ammount, 2);
+        Console.WriteLine(formattedAmount);
+
+        ammountFrom = formattedAmount;
+
+        if(activeSelection == EUnits.Waluta){
+            Unit matchingUnitFrom = currencyUnits.Find(el => el.Name == valueFrom);
+            Unit matchingUnitTo = currencyUnits.Find(el => el.Name == valueTo);
+            if (matchingUnitFrom == null || matchingUnitTo == null) return;
+
+            ammountTo =(float)Math.Round(formattedAmount * matchingUnitFrom.ToBaseUnit / matchingUnitTo.ToBaseUnit, 2);
+            Console.WriteLine(ammountTo);
+
+
+        } else if(activeSelection == EUnits.Waga){
+            Unit matchingUnitFrom = weightUnits.Find(el => el.Name == valueFrom);
+            Unit matchingUnitTo = weightUnits.Find(el => el.Name == valueTo);
+            if (matchingUnitFrom == null || matchingUnitTo == null) return;
+
+            ammountTo = formattedAmount * matchingUnitFrom.ToBaseUnit / matchingUnitTo.ToBaseUnit;
+            Console.WriteLine(ammountTo);
+        }
+    }
+
+}
+
+<h1>Przeliczanie jednostek</h1>
+
+<select class="form-select" @onchange="handleUnitChange">
+	<option value="currency">Waluty</option>
+	<option value="weight">Wagi</option>
+</select>
+
+<section class="units">
+	<h2>Wybierz przeliczane jednostki</h2>
+    @if(activeSelection == EUnits.Waluta){
+	    <select name="currencyFrom" class="form-select" @onchange="@(e => handleSubUnitChange(e, EValues.From))">
+            @foreach(var currency in currencyUnits){
+                <option value="@currency.Name">@currency.Name</option>
+            }
+	    </select>
+        <select name="currencyTo" class="form-select" @onchange="@(e => handleSubUnitChange(e, EValues.To))">
+            @foreach(var currency in currencyUnits){
+                <option value="@currency.Name">@currency.Name</option>
+            }
+	    </select>
+    } else {
+	    <select name="weightFrom" class="form-select" @onchange="@(e => handleSubUnitChange(e, EValues.From))">
+		    @foreach(var weight in weightUnits){
+                <option value="@weight.Name">@weight.Name</option>
+            }
+        </select>
+        <select name="weightTo" class="form-select" @onchange="@(e => handleSubUnitChange(e, EValues.To))">
+		    @foreach(var weight in weightUnits){
+                <option value="@weight.Name">@weight.Name</option>
+            }
+        </select>
+    }
+
+
+
+    <h2>@activeSelection</h2>
+    <label for="inputValue">Podaj wartość liczbową</label>
+    <input idid="inputValue" name="inputValue" type="number" value="@ammountFrom" @onchange="handleValueChange"/>
+    <p class="result">@ammountFrom @valueFrom = @ammountTo @valueTo</p>
+
+</section>
+
+Welcome to your new app

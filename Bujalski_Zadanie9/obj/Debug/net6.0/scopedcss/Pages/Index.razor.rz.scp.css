@@ -1,0 +1,25 @@
+*[b-fz4k2zzctl] {
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+}
+
+h1[b-fz4k2zzctl] {
+
+    margin: 24px 0;
+}
+
+h2[b-fz4k2zzctl] {
+    margin: 16px 0;
+}
+
+label[b-fz4k2zzctl] {
+    display: block;
+    font-size: 14px;
+    color: dimgrey;
+}
+
+.result[b-fz4k2zzctl] {
+    font-size: 20px;
+    font-weight: 700;
+}
